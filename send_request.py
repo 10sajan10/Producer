@@ -37,7 +37,7 @@ def widget_request_handler(request_data):
         print("request Invalid")
 
     # Add the processed widget request to the queue
-    add_to_queue(widget_request)
+    add_to_sqs_queue(widget_request, sqs_client, queue_url)
 
     # Return a response (simulating Lambda response)
     return {
@@ -56,3 +56,6 @@ widget_data = json.loads(file_content)
 
 # Print the dictionary
 print(widget_data)
+
+response=widget_request_handler(widget_data)
+print(response)
