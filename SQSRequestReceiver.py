@@ -13,7 +13,7 @@ class SQSRequestReceiver:
             response = self.sqs_client.receive_message(
             QueueUrl=self.url,
             MaxNumberOfMessages=maxno,
-            VisibilityTimeout=60,
+            VisibilityTimeout=0,
             WaitTimeSeconds=10
         )
             messages = response.get('Messages', None)
@@ -23,6 +23,7 @@ class SQSRequestReceiver:
             else:
                 for message in messages:
                     print(message)
+                    print("\n")
 
             return messages
         except botocore.exceptions.ClientError as e:

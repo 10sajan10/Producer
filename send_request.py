@@ -1,15 +1,18 @@
 import json
 import boto3
+import os
 
 # Initialize the SQS client
 sqs_client = boto3.client('sqs', region_name='us-east-1')
-queue_url = 'https://sqs.us-east-1.amazonaws.com/186579595491/cs5250-requests'
 
 # Helper class to handle widget requests
 class WidgetRequestHandler:
-    def __init__(self, sqs_client, queue_url):
+    def __init__(self, sqs_client):
+        # Retrieve the queue URL from environment variables
+        self.queue_url = os.environ.get('QUEUE_URL')
+        if not self.queue_url:
+            raise ValueError("QUEUE_URL environment variable is not set.")
         self.sqs_client = sqs_client
-        self.queue_url = queue_url
 
     def validate_request(self, request_data):
         """
@@ -77,7 +80,7 @@ def lambda_handler(event, context):
         widget_data = json.loads(event['body'])
 
         # Initialize the WidgetRequestHandler
-        widget_handler = WidgetRequestHandler(sqs_client, queue_url)
+        widget_handler = WidgetRequestHandler(sqs_client)
 
         # Process the widget request
         result = widget_handler.process_widget_request(widget_data)
