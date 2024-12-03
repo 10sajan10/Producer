@@ -1,7 +1,7 @@
 import requests
 
 # Base URL for the API
-base_url = "https://lril85htk0.execute-api.us-east-1.amazonaws.com/prod/widgets"
+base_url = <API INVOKE URL HERE>
 
 
 create_request = {
@@ -9,7 +9,7 @@ create_request = {
     "owner": "sajan",
     "Age" : 25,
     "Gender":"Male",
-    "height" : 172
+    "height" : 179
 }
 create_response = requests.post(base_url, json=create_request)
 print("CREATE Response:", create_response.status_code, create_response.json())
