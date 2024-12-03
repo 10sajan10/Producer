@@ -5,8 +5,7 @@ base_url = "https://lril85htk0.execute-api.us-east-1.amazonaws.com/prod/widgets"
 
 
 create_request = {
-    "type": "merge",
-    "widgetId": "63738ediuduiy983",
+    "type": "update",
     "owner": "sajan",
     "Age" : 25,
     "Gender":"Male",

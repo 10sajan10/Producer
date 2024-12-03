@@ -74,12 +74,15 @@ def lambda_handler(event, context):
     The entry point for the Lambda function that handles the API Gateway event.
     """
     try:
-        print("Incoming event:", json.dumps(event))
+
         http_method = event.get('httpMethod', None)
         print(http_method)
+        print(event)
 
-        # Use the event directly
-        widget_data = event
+        if event.get('body'):
+            widget_data = json.loads(event['body'])  # Parse the string into a dictionary
+        else:
+            widget_data = {}
 
         # Initialize the WidgetRequestHandler
         widget_handler = WidgetRequestHandler(sqs_client)
