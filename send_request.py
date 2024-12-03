@@ -5,7 +5,7 @@ import os
 # Initialize the SQS client
 sqs_client = boto3.client('sqs', region_name='us-east-1')
 
-# Helper class to handle widget requests
+
 class WidgetRequestHandler:
     def __init__(self, sqs_client):
         # Retrieve the queue URL from environment variables
@@ -17,26 +17,29 @@ class WidgetRequestHandler:
     def validate_request(self, request_data):
         """
         Validate the widget request.
-        The request must include a valid 'type' field with values 'create', 'update', or 'delete'.
+        The request must include:
+        - A valid 'type' field with values 'create', 'update', or 'delete'.
+        - A valid 'widgetId' field.
         """
         available_requests = ['create', 'update', 'delete']
+
         if 'type' not in request_data or request_data['type'] not in available_requests:
             raise ValueError("Invalid request type. Must be 'create', 'update', or 'delete'.")
+
+        if 'widgetId' not in request_data:
+            raise ValueError("WidgetId is required.")
+
         return True
 
     def add_to_sqs_queue(self, widget_request):
         """
         Add the widget request to the SQS queue.
         """
-        # Convert the widget request dictionary to a JSON string
         message_body = json.dumps(widget_request)
-
-        # Send the message to the SQS queue
         response = self.sqs_client.send_message(
             QueueUrl=self.queue_url,
             MessageBody=message_body
         )
-
         return response
 
     def process_widget_request(self, request_data):
@@ -44,10 +47,7 @@ class WidgetRequestHandler:
         Main processing function for widget requests. This includes validation and adding to the queue.
         """
         try:
-            # Validate the widget request
             self.validate_request(request_data)
-
-            # Add the request to the SQS queue
             response = self.add_to_sqs_queue(request_data)
 
             return {
@@ -55,20 +55,18 @@ class WidgetRequestHandler:
                 "message": "Request successfully added to the queue.",
                 "MessageId": response['MessageId']
             }
-
         except ValueError as e:
-            # Handle invalid request type
             return {
                 "status": "error",
                 "message": str(e)
             }
         except Exception as e:
-            # Handle general errors
             return {
                 "status": "error",
                 "message": "An error occurred while processing the request.",
                 "error": str(e)
             }
+
 
 # Lambda handler function (entry point)
 def lambda_handler(event, context):
@@ -76,8 +74,12 @@ def lambda_handler(event, context):
     The entry point for the Lambda function that handles the API Gateway event.
     """
     try:
-        # Parse the incoming event body as JSON
-        widget_data = json.loads(event['body'])
+        print("Incoming event:", json.dumps(event))
+        http_method = event.get('httpMethod', None)
+        print(http_method)
+
+        # Use the event directly
+        widget_data = event
 
         # Initialize the WidgetRequestHandler
         widget_handler = WidgetRequestHandler(sqs_client)
@@ -92,7 +94,6 @@ def lambda_handler(event, context):
         }
 
     except Exception as e:
-        # Handle any errors in the Lambda function
         return {
             "statusCode": 500,
             "body": json.dumps({"status": "error", "message": str(e)})
