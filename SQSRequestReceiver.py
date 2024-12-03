@@ -13,8 +13,8 @@ class SQSRequestReceiver:
             response = self.sqs_client.receive_message(
             QueueUrl=self.url,
             MaxNumberOfMessages=maxno,
-            VisibilityTimeout=0,
-            WaitTimeSeconds=10
+            VisibilityTimeout=600,
+            WaitTimeSeconds=20
         )
             messages = response.get('Messages', None)
             if not messages:
